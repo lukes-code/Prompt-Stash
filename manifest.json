@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Saver",
+  "description": "Save and manage your AI prompts.",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["storage", "scripting"],
+  "host_permissions": ["https://chatgpt.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
