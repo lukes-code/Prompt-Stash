@@ -1,54 +1,22 @@
-# React + TypeScript + Vite
+Prompt Stash
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A chrome extension and friendly widget to assist you in remembering your AI prompts.
 
-Currently, two official plugins are available:
+Auto detects when you're on chatgpt.com
+Auto places the widget alongside the input field
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Features:
+- Save prompt via chrome extension
+- Copy via chrome extension
+- Delete a saved prompt via chrome extension
+- Customise whether you want the save or paste button in the widget
+- Widget itself which shakes on unsuccessful tasks or glows green on success
+- Widget that allows pasting the last saved prompt directly into the input box
+- Widget that saves whats in the input box as a prompt
+- Save prompt shortcut keys
+- Paste most recently saved prompt shortcut keys
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+<img width="369" alt="image" src="https://github.com/user-attachments/assets/fc9222dc-fe0c-4c8e-bd16-944461278697" />
+<img width="948" alt="image" src="https://github.com/user-attachments/assets/def37d58-97e3-4f29-9ee5-11eb3dfd38ef" />
+<img width="334" alt="image" src="https://github.com/user-attachments/assets/2544c88f-6ea8-49bd-ad20-6382d1f75151" />
+[screen-capture6-ezgif.com-video-cutter.webm](https://github.com/user-attachments/assets/f94e0597-a100-4502-8efd-f9fcae5f4b78)
