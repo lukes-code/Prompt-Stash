@@ -16,6 +16,14 @@ Features:
 - Save prompt shortcut keys
 - Paste most recently saved prompt shortcut keys
 
+To use locally:
+- npm i
+- npm run build
+- go to chrome://extensions/
+- turn on developer mode
+- click "Load unpacked"
+- Select the "dist" folder inside of your project
+
 <img width="369" alt="image" src="https://github.com/user-attachments/assets/fc9222dc-fe0c-4c8e-bd16-944461278697" />
 <img width="948" alt="image" src="https://github.com/user-attachments/assets/def37d58-97e3-4f29-9ee5-11eb3dfd38ef" />
 <img width="334" alt="image" src="https://github.com/user-attachments/assets/2544c88f-6ea8-49bd-ad20-6382d1f75151" />
