@@ -14,6 +14,10 @@ export default defineConfig({
           src: "manifest.json", // Copy the manifest file to dist/
           dest: "", // Place it in the root of dist
         },
+        {
+          src: "icons", // Copy the entire icons folder to dist/
+          dest: "", // Place it in the root of dist
+        },
       ],
     }),
   ],

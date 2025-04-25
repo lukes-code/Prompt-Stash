@@ -1,37 +1,78 @@
 (function () {
   let showSaveButton = true;
   let showPasteButton = true;
+  let enableSaveShortcut = true;
+
+  const style = document.createElement("style");
+  style.innerHTML = `
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+
+  .shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  .ai-gradient-border {
+    position: absolute;
+    border-radius: 30px;
+    padding: 2px;
+    --gradient: linear-gradient(135deg, #00f0ff, #ff1cf7, #00f0ff);
+    background: var(--gradient);
+    background-size: 300% 300%;
+    animation: borderPulse 5s ease infinite;
+    transition:
+      background 0.5s ease,
+      background-position 0.5s ease,
+      --gradient 0.5s ease;
+    z-index: 9999;
+  }
+
+  .ai-gradient-border.success {
+    --gradient: linear-gradient(135deg, #00ff88, #00cc66, #00ff88);
+  }
+
+  @keyframes borderPulse {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .ai-gradient-inner {
+    border-radius: 25px;
+    background-color: #1f2937;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+    transition: height 0.3s ease;
+    width: 50px;
+    height: 50px;
+  }
+  `;
+  document.head.appendChild(style);
 
   window.addEventListener("load", () => {
-    console.log("Drawer script loaded");
+    const wrapper = document.createElement("div");
+    wrapper.className = "ai-gradient-border";
 
     const drawer = document.createElement("div");
-    drawer.style.position = "absolute";
-    drawer.style.display = "flex";
-    drawer.style.flexDirection = "column"; // Standard column direction
-    drawer.style.alignItems = "center";
-    drawer.style.justifyContent = "flex-end"; // Align items to the end (bottom)
-    drawer.style.transition = "height 0.3s ease"; // Animate height
-    drawer.style.overflow = "hidden";
-    drawer.style.height = "50px"; // Initial height
-    drawer.style.width = "50px"; // Fixed width
-    drawer.style.borderRadius = "25px";
-    drawer.style.backgroundColor = "#1f2937";
-    drawer.style.zIndex = "9999";
-    drawer.style.padding = "10px 0"; // Adjust padding for vertical growth
+    drawer.className = "ai-gradient-inner";
 
     let drawerOpen = false;
 
     const positionDrawer = () => {
       const input = document.querySelector("#prompt-textarea");
       if (!input) return;
-
       const rect = input.getBoundingClientRect();
-
-      // Position so the bottom of the drawer aligns with the input
-      drawer.style.top = "auto"; // Clear the top position
-      drawer.style.left = `${rect.left - 85}px`;
-      drawer.style.bottom = `${
+      wrapper.style.left = `${rect.left - 85}px`;
+      wrapper.style.bottom = `${
         window.innerHeight - rect.top - window.scrollY - 50
       }px`;
     };
@@ -39,27 +80,23 @@
     const logo = document.createElement("div");
     logo.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 100" width="30" height="30">
-      <defs>
-        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:rgb(0,204,255);stop-opacity:1" />
-          <stop offset="100%" style="stop-color:rgb(192,192,192);stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <g transform="translate(5,0)"> <!-- shift to center horizontally -->
-        <path d="M30,10 C40,10, 55,25, 55,40 C55,55, 40,60, 30,60 L30,90 L15,90 L15,10 Z" 
-          fill="url(#grad1)" stroke="black" stroke-width="3" />
-        <path d="M30,25 C35,25, 45,30, 45,35 C45,40, 35,45, 30,45 C25,45, 20,40, 20,35 C20,30, 25,25, 30,25 Z" 
-          fill="white" />
-      </g>
-    </svg>
-    `;
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:rgb(0,204,255);stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(192,192,192);stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <g transform="translate(5,0)">
+          <path d="M30,10 C40,10, 55,25, 55,40 C55,55, 40,60, 30,60 L30,90 L15,90 L15,10 Z" fill="url(#grad1)" stroke="black" stroke-width="3"/>
+          <path d="M30,25 C35,25, 45,30, 45,35 C45,40, 35,45, 30,45 C25,45, 20,40, 20,35 C20,30, 25,25, 30,25 Z" fill="white"/>
+        </g>
+      </svg>`;
     logo.style.cursor = "pointer";
     logo.style.flexShrink = "0";
-    logo.style.order = "3"; // Put the logo at the end (bottom)
+    logo.style.order = "3";
 
-    // Create buttons first
     const pasteSVG = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-paste-icon lucide-clipboard-paste">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-paste">
         <path d="M11 14h10"/>
         <path d="M16 4h2a2 2 0 0 1 2 2v1.344"/>
         <path d="m17 18 4-4-4-4"/>
@@ -74,6 +111,12 @@
         <polyline points="7 3 7 8 15 8"/>
       </svg>`;
 
+    const checkSVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle">
+        <path d="M5 13l4 4L19 7"/>
+        <circle cx="12" cy="12" r="10"/>
+      </svg>`;
+
     const createIconButton = (svg, onClick) => {
       const btn = document.createElement("button");
       btn.innerHTML = svg;
@@ -81,7 +124,7 @@
       btn.style.border = "none";
       btn.style.color = "#fff";
       btn.style.cursor = "pointer";
-      btn.style.marginBottom = "10px"; // Space between buttons
+      btn.style.marginBottom = "10px";
       btn.style.visibility = "hidden";
       btn.style.opacity = "0";
       btn.style.transition = "opacity 0.2s ease";
@@ -89,37 +132,31 @@
       return btn;
     };
 
-    const pasteBtn = createIconButton(pasteSVG, () => {
-      chrome.storage.sync.get("lastPrompt", (result) => {
-        const lastPrompt = result.lastPrompt;
-        const textarea = document.querySelector("#prompt-textarea");
+    const handleError = () => {
+      drawer.classList.add("shake");
+      setTimeout(() => drawer.classList.remove("shake"), 1000);
+    };
 
-        if (lastPrompt?.text && textarea) {
-          const isEditable =
-            textarea.getAttribute("contenteditable") === "true";
-          if (isEditable) textarea.textContent = lastPrompt.text;
-          else textarea.value = lastPrompt.text;
+    const flashSuccessBorder = () => {
+      wrapper.classList.add("success");
+      setTimeout(() => wrapper.classList.remove("success"), 2000);
+    };
 
-          textarea.dispatchEvent(new Event("input", { bubbles: true }));
-          textarea.focus();
-        } else {
-          alert("No saved prompt or input found.");
-        }
-      });
-    });
-    pasteBtn.style.order = "2"; // Second from the bottom
+    const handleSuccess = (button) => {
+      const originalSVG = button.innerHTML;
+      button.innerHTML = checkSVG;
+      flashSuccessBorder();
+      setTimeout(() => (button.innerHTML = originalSVG), 2000);
+    };
 
-    const saveBtn = createIconButton(saveSVG, async () => {
+    const saveCurrentPrompt = () => {
       const textarea = document.querySelector("#prompt-textarea");
       const text =
         textarea?.getAttribute("contenteditable") === "true"
           ? textarea.textContent
           : textarea?.value;
 
-      if (!text?.trim()) {
-        alert("Nothing to save.");
-        return;
-      }
+      if (!text?.trim()) return handleError();
 
       const prompt = {
         id: Date.now().toString(),
@@ -132,43 +169,68 @@
         const newPrompts = [...prompts, prompt];
         chrome.storage.sync.set(
           { prompts: newPrompts, lastPrompt: prompt },
-          () => {
-            if (chrome.runtime.lastError) {
-              alert("Error saving prompt: " + chrome.runtime.lastError.message);
-            } else {
-              alert("Prompt saved.");
-            }
-          }
+          () =>
+            chrome.runtime.lastError ? handleError() : handleSuccess(saveBtn)
         );
       });
-    });
-    saveBtn.style.order = "1"; // Top-most when expanded
+    };
 
-    // Update buttons function that checks and dynamically adds/removes buttons
+    const pasteLastPrompt = () => {
+      chrome.storage.sync.get("lastPrompt", (result) => {
+        const lastPrompt = result.lastPrompt;
+        const textarea = document.querySelector("#prompt-textarea");
+        if (lastPrompt?.text && textarea) {
+          const isEditable =
+            textarea.getAttribute("contenteditable") === "true";
+          if (isEditable) textarea.textContent = lastPrompt.text;
+          else textarea.value = lastPrompt.text;
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
+          textarea.focus();
+          handleSuccess(pasteBtn);
+        } else {
+          handleError();
+        }
+      });
+    };
+
+    const saveBtn = createIconButton(saveSVG, saveCurrentPrompt);
+    const pasteBtn = createIconButton(pasteSVG, pasteLastPrompt);
+    saveBtn.style.order = "1";
+    pasteBtn.style.order = "2";
+
     const updateDrawerButtons = () => {
-      // Clear any existing buttons to avoid duplicates
-      drawer.innerHTML = ""; // This clears all content inside the drawer
-
-      // Re-add the settings based on the values
+      drawer.innerHTML = "";
       if (showSaveButton) drawer.appendChild(saveBtn);
       if (showPasteButton) drawer.appendChild(pasteBtn);
-
-      // Always add the logo
       drawer.appendChild(logo);
     };
 
-    // Get initial settings
-    chrome.storage.sync.get(["showSave", "showPaste"], (settings) => {
-      showSaveButton = settings.showSave !== false;
-      showPasteButton = settings.showPaste !== false;
+    chrome.storage.sync.get(
+      ["showSave", "showPaste", "enableSaveShortcut", "enablePasteShortcut"],
+      (settings) => {
+        showSaveButton = settings.showSave !== false;
+        showPasteButton = settings.showPaste !== false;
+        enableSaveShortcut = settings.enableSaveShortcut !== false;
+        enablePasteShortcut = settings.enablePasteShortcut !== false;
+        updateDrawerButtons();
+      }
+    );
 
-      updateDrawerButtons(); // Update drawer buttons based on settings
+    chrome.storage.onChanged.addListener((changes) => {
+      if (changes.showSave)
+        showSaveButton = changes.showSave.newValue !== false;
+      if (changes.showPaste)
+        showPasteButton = changes.showPaste.newValue !== false;
+      if (changes.enableSaveShortcut)
+        enableSaveShortcut = changes.enableSaveShortcut.newValue !== false;
+      if (changes.enablePasteShortcut)
+        enablePasteShortcut = changes.enablePasteShortcut.newValue !== false;
+      updateDrawerButtons();
     });
 
     drawer.addEventListener("mouseenter", () => {
       drawerOpen = true;
       drawer.style.height = "fit-content";
-
       if (showSaveButton) {
         saveBtn.style.visibility = "visible";
         saveBtn.style.opacity = "1";
@@ -182,49 +244,26 @@
     drawer.addEventListener("mouseleave", () => {
       drawerOpen = false;
       drawer.style.height = "50px";
-
       [saveBtn, pasteBtn].forEach((btn) => {
         btn.style.visibility = "hidden";
         btn.style.opacity = "0";
       });
     });
 
-    // Listen for storage changes to dynamically update button visibility
-    chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === "sync") {
-        if (changes.showSave) {
-          showSaveButton = changes.showSave.newValue !== false;
-        }
-        if (changes.showPaste) {
-          showPasteButton = changes.showPaste.newValue !== false;
-        }
-        updateDrawerButtons(); // Re-append buttons based on new settings
+    wrapper.addEventListener("click", () => {
+      if (!drawerOpen) {
+        drawer.style.height = "fit-content";
+        drawerOpen = true;
       }
     });
 
-    // Drawer click behavior
-    drawer.addEventListener("click", () => {
-      if (!showSaveButton && !showPasteButton) {
-        // Open the extension popup when neither Save nor Paste is checked
-        chrome.runtime.openOptionsPage();
-      } else {
-        // Expand drawer if buttons are enabled
-        if (!drawerOpen) {
-          drawer.style.height = "fit-content";
-          drawerOpen = true;
-        }
-      }
-    });
-
-    document.body.appendChild(drawer);
+    wrapper.appendChild(drawer);
+    document.body.appendChild(wrapper);
 
     const tryPosition = () => {
       const input = document.querySelector("#prompt-textarea");
-      if (input) {
-        positionDrawer();
-      } else {
-        setTimeout(tryPosition, 100);
-      }
+      if (input) positionDrawer();
+      else setTimeout(tryPosition, 100);
     };
 
     tryPosition();
@@ -238,5 +277,37 @@
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+
+    const urlObserver = new MutationObserver(() => {
+      positionDrawer();
+    });
+
+    urlObserver.observe(document.body, { childList: true, subtree: true });
+
+    let shortcutListener = null;
+
+    chrome.storage.sync.get(
+      ["showSave", "showPaste", "enableSaveShortcut", "enablePasteShortcut"],
+      (settings) => {
+        showSaveButton = settings.showSave !== false;
+        showPasteButton = settings.showPaste !== false;
+        enableSaveShortcut = settings.enableSaveShortcut !== false;
+        enablePasteShortcut = settings.enablePasteShortcut !== false;
+        updateDrawerButtons();
+
+        if (!shortcutListener) {
+          shortcutListener = (e) => {
+            if (e.ctrlKey && e.shiftKey && e.code === "KeyS") {
+              e.preventDefault();
+              saveCurrentPrompt();
+            } else if (e.ctrlKey && e.shiftKey && e.code === "KeyV") {
+              e.preventDefault();
+              pasteLastPrompt();
+            }
+          };
+          window.addEventListener("keydown", shortcutListener);
+        }
+      }
+    );
   });
 })();
