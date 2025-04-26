@@ -129,14 +129,14 @@ export const Popup: React.FC = () => {
       </div>
 
       <div className="mt-4 text-xs text-gray-500 text-center">
-        made by{" "}
+        By luke ❤️{" "}
         <a
-          href="https://www.instagram.com/lukes.code/"
+          href="https://buymeacoffee.com/lukescode"
+          target="_blank"
           className="text-blue-500 underline"
         >
-          luke
-        </a>{" "}
-        with love ❤️
+          buy me a coffee
+        </a>
       </div>
     </div>
   );

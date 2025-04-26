@@ -58,6 +58,30 @@
   `;
   document.head.appendChild(style);
 
+  const getPromptsFromStorage = () => {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get("prompts", (result) => {
+        resolve(result.prompts || []);
+      });
+    });
+  };
+
+  const getLastPromptFromStorage = () => {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get("lastPrompt", (result) => {
+        resolve(result.lastPrompt || null);
+      });
+    });
+  };
+
+  const setPromptsToStorage = (prompts, lastPrompt) => {
+    return new Promise((resolve) => {
+      chrome.storage.sync.set({ prompts, lastPrompt }, () => {
+        resolve(!chrome.runtime.lastError);
+      });
+    });
+  };
+
   window.addEventListener("load", () => {
     const wrapper = document.createElement("div");
     wrapper.className = "ai-gradient-border";
@@ -149,7 +173,7 @@
       setTimeout(() => (button.innerHTML = originalSVG), 2000);
     };
 
-    const saveCurrentPrompt = () => {
+    const saveCurrentPrompt = async () => {
       const textarea = document.querySelector("#prompt-textarea");
       const text =
         textarea?.getAttribute("contenteditable") === "true"
@@ -164,33 +188,27 @@
         createdAt: Date.now(),
       };
 
-      chrome.storage.sync.get("prompts", (result) => {
-        const prompts = result.prompts || [];
-        const newPrompts = [...prompts, prompt];
-        chrome.storage.sync.set(
-          { prompts: newPrompts, lastPrompt: prompt },
-          () =>
-            chrome.runtime.lastError ? handleError() : handleSuccess(saveBtn)
-        );
-      });
+      const prompts = await getPromptsFromStorage();
+      const newPrompts = [...prompts, prompt];
+      const success = await setPromptsToStorage(newPrompts, prompt);
+
+      if (!success) return handleError();
+      handleSuccess(saveBtn);
     };
 
-    const pasteLastPrompt = () => {
-      chrome.storage.sync.get("lastPrompt", (result) => {
-        const lastPrompt = result.lastPrompt;
-        const textarea = document.querySelector("#prompt-textarea");
-        if (lastPrompt?.text && textarea) {
-          const isEditable =
-            textarea.getAttribute("contenteditable") === "true";
-          if (isEditable) textarea.textContent = lastPrompt.text;
-          else textarea.value = lastPrompt.text;
-          textarea.dispatchEvent(new Event("input", { bubbles: true }));
-          textarea.focus();
-          handleSuccess(pasteBtn);
-        } else {
-          handleError();
-        }
-      });
+    const pasteLastPrompt = async () => {
+      const lastPrompt = await getLastPromptFromStorage();
+      const textarea = document.querySelector("#prompt-textarea");
+      if (lastPrompt?.text && textarea) {
+        const isEditable = textarea.getAttribute("contenteditable") === "true";
+        if (isEditable) textarea.textContent = lastPrompt.text;
+        else textarea.value = lastPrompt.text;
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        textarea.focus();
+        handleSuccess(pasteBtn);
+      } else {
+        handleError();
+      }
     };
 
     const saveBtn = createIconButton(saveSVG, saveCurrentPrompt);
