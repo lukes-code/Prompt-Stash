@@ -16,7 +16,7 @@
     "48": "icons/ps-48.png",
     "128": "icons/ps-128.png"
   },
-  "permissions": ["storage", "scripting"],
+  "permissions": ["storage"],
   "host_permissions": ["https://chatgpt.com/*"],
   "content_scripts": [
     {
